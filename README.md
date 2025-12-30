@@ -20,15 +20,10 @@ The object is approximated by the **barycenter of tracked points**, allowing the
 ## Tools Used
 
 [![python](https://img.shields.io/badge/Python-3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
-
 [![NumPy](https://img.shields.io/badge/NumPy-2.2-013243.svg?style=flat&logo=numpy&logoColor=white)](https://numpy.org)
-
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.12-5C3EE8.svg?style=flat&logo=opencv&logoColor=white)](https://opencv.org)
-
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-3.10-11557c.svg?style=flat&logo=matplotlib&logoColor=white)](https://matplotlib.org)
-
 [![jupyter](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=Jupyter)](https://jupyter.org/)
-
 [![Anaconda](https://img.shields.io/badge/Anaconda-44A833?style=flat&logo=anaconda&logoColor=white)](https://www.anaconda.com/)
 
 
