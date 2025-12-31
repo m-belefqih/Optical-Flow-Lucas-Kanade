@@ -57,7 +57,7 @@ The project was developed as part of a **Computer Vision / Image Processing** co
 5. Run the script:
 
    ```bash
-   python main.py
+   python3 main.py
    ```
 
 * Press **ESC** to stop the video playback.
