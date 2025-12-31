@@ -1,9 +1,9 @@
 # Optical-Flow-Lucas-Kanade
 
-Optical flow is a technique used to estimate the apparent motion of pixels between two consecutive frames in a video sequence.
-In this project, we track **feature points** detected on a rigid object and estimate its motion over time.
+This project focuses on **motion estimation of a single rigid object** in a video sequence using **optical flow**.
+The movement is estimated using the **Lucas–Kanade pyramidal method**, and the **global trajectory, speed, and direction** of the object are analyzed.
 
-The object is approximated by the **barycenter of tracked points**, allowing the extraction of its **global trajectory** as well as the analysis of its **speed and direction**.
+The project was developed as part of a **Computer Vision / Image Processing** course to apply fundamental concepts of motion estimation.
 
 
 ## Features
@@ -76,6 +76,13 @@ The object is approximated by the **barycenter of tracked points**, allowing the
 * Stores the object’s position over time to extract its **trajectory**
 * Visualizes the **motion field** by drawing displacement vectors on the video frames
 * Overlays motion vectors on the original frame for intuitive visualization
+
+## Results
+
+- **Average speed:** 5.94 pixels/frame  
+- **Average direction:** 0.26 radians (≈ 14°)  
+
+These results are computed from the global trajectory extracted using Lucas–Kanade optical flow and represent the dominant motion of the tracked rigid object.
 
 ---
 
