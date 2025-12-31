@@ -3,47 +3,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # =====================================================
-# 1. Chargement de la vidéo
+# 1. Video loading
 # =====================================================
-# La vidéo contient un objet rigide unique (avion)
-# filmé par une caméra fixe
+# The video contains a single rigid object (airplane)
+# captured using a fixed camera
 cap = cv2.VideoCapture("airplane.mp4")
 
 if not cap.isOpened():
-    print("Erreur : impossible d'ouvrir la vidéo")
+    print("Error: unable to open the video")
     exit()
 
 
 # =====================================================
-# 2. Détection des points caractéristiques (Shi-Tomasi)
+# 2. Feature point detection (Shi-Tomasi)
 # =====================================================
-# Ces points seront suivis d'une image à l'autre
-
-# ----------------------------
-# 2. Paramètres Shi-Tomasi
-# ----------------------------
-#feature_params = dict(
-#    maxCorners=100,
-#    qualityLevel=0.3,
-#    minDistance=7,
-#    blockSize=7
-#)
-
+# These feature points will be tracked from frame to frame
 feature_params = dict(
-    maxCorners=200,         # Nombre maximal de points détectés
-    qualityLevel=0.01,      # Qualité minimale des coins
-    minDistance=5,          # Distance minimale entre deux points
-    blockSize=7             # Taille du voisinage
+    maxCorners=200,         # Maximum number of detected points
+    qualityLevel=0.01,      # Minimum quality level for corners
+    minDistance=5,          # Minimum distance between detected points
+    blockSize=7             # Size of the neighborhood considered
 )
 
 
 # =====================================================
-# 3. Paramètres de l'algorithme Lucas–Kanade
+# 3. Lucas–Kanade optical flow parameters
 # =====================================================
-# Version pyramidale pour gérer les déplacements importants
+# Pyramidal version to handle larger motions
 lk_params = dict(
-    winSize=(15, 15),     # Taille de la fenêtre locale
-    maxLevel=2,           # Nombre de niveaux de la pyramide
+    winSize=(15, 15),       # Size of the local search window
+    maxLevel=2,             # Number of pyramid levels
     criteria=(
         cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT,
         10,
@@ -52,49 +41,49 @@ lk_params = dict(
 )
 
 # =====================================================
-# 4. Lecture de la première image
+# 4. Read the first frame
 # =====================================================
-# Conversion en niveaux de gris (nécessaire pour le flot optique)
+# Conversion to grayscale (required for optical flow)
 ret, old_frame = cap.read()
 old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
 
-# Détection des points à suivre dans la première image
+# Detect initial feature points to track
 p0 = cv2.goodFeaturesToTrack(
     old_gray, mask=None, **feature_params
 )
 
-# Image masque utilisée pour dessiner les vecteurs de mouvement
+# Mask image used to draw motion vectors
 mask = np.zeros_like(old_frame)
 
-# Listes pour stocker la trajectoire globale de l'objet
+# Lists to store the global trajectory of the object
 trajectory_x = []
 trajectory_y = []
 
 # =====================================================
-# 5. Boucle principale de traitement vidéo
+# 5. Main video processing loop
 # =====================================================
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
-    # Conversion de l'image courante en niveaux de gris
+    # Convert the current frame to grayscale
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Calcul du flot optique entre deux images consécutives
+    # Compute optical flow between two consecutive frames
     p1, st, _ = cv2.calcOpticalFlowPyrLK(
         old_gray, frame_gray, p0, None, **lk_params
     )
 
     if p1 is not None:
-        # Sélection des points correctement suivis
+        # Select successfully tracked points
         good_new = p1[st == 1]
         good_old = p0[st == 1]
 
         # =================================================
-        # Estimation de la position globale de l'objet
+        # Estimation of the global object position
         # =================================================
-        # On approxime l'objet par le barycentre
+        # The object position is approximated by the centroid
         center_x = np.mean(good_new[:, 0])
         center_y = np.mean(good_new[:, 1])
 
@@ -102,13 +91,13 @@ while True:
         trajectory_y.append(center_y)
 
         # =================================================
-        # Visualisation du champ de mouvement
+        # Motion field visualization
         # =================================================
         for new, old in zip(good_new, good_old):
             a, b = new.ravel()
             c, d = old.ravel()
 
-            # Tracé du vecteur de déplacement
+            # Draw the displacement vector
             mask = cv2.line(
                 mask,
                 (int(a), int(b)),
@@ -117,7 +106,7 @@ while True:
                 2
             )
 
-            # Dessin du point courant
+            # Draw the current feature point
             frame = cv2.circle(
                 frame,
                 (int(a), int(b)),
@@ -126,52 +115,52 @@ while True:
                 -1
             )
 
-    # Superposition des vecteurs sur l'image
+    # Overlay motion vectors on the current frame
     img = cv2.add(frame, mask)
     cv2.imshow("Optical Flow - Object Motion", img)
 
-    # Mise à jour pour l'itération suivante
+    # Update variables for the next iteration
     old_gray = frame_gray.copy()
     p0 = good_new.reshape(-1, 1, 2)
 
-    # Sortie avec la touche ESC
+    # Exit when ESC key is pressed
     if cv2.waitKey(30) & 0xFF == 27:
         break
 
-# Libération des ressources
+# Release resources
 cap.release()
 cv2.destroyAllWindows()
 
 # =====================================================
-# 6. Affichage de la trajectoire globale de l'objet
+# 6. Display the global object trajectory
 # =====================================================
 plt.figure()
 plt.plot(trajectory_x, trajectory_y, '-o')
-plt.title("Trajectoire globale de l'objet")
-plt.xlabel("Position X (pixels)")
-plt.ylabel("Position Y (pixels)")
-plt.gca().invert_yaxis()  # Convention image (origine en haut à gauche)
+plt.title("Global Object Trajectory")
+plt.xlabel("X Position (pixels)")
+plt.ylabel("Y Position (pixels)")
+plt.gca().invert_yaxis()  # Image coordinate convention (origin at top-left)
 plt.grid()
 plt.show()
 
 # =====================================================
-# 7. Analyse de la vitesse et de la direction
+# 7. Speed and direction analysis
 # =====================================================
 trajectory_x = np.array(trajectory_x)
 trajectory_y = np.array(trajectory_y)
 
-# Déplacements entre images successives
+# Displacements between successive frames
 dx = np.diff(trajectory_x)
 dy = np.diff(trajectory_y)
 
-# Calcul de la vitesse instantanée (pixels/frame)
+# Instantaneous speed (pixels per frame)
 speed = np.sqrt(dx**2 + dy**2)
 mean_speed = np.mean(speed)
 
-print("Vitesse moyenne (pixels/frame) :", mean_speed)
+print("Average speed (pixels/frame):", mean_speed)
 
-# Calcul de la direction du mouvement
+# Motion direction computation
 direction = np.arctan2(dy, dx)
 mean_direction = np.mean(direction)
 
-print("Direction moyenne (rad) :", mean_direction)
+print("Average direction (rad):", mean_direction)
