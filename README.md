@@ -45,7 +45,7 @@ The project was developed as part of a **Computer Vision / Image Processing** co
 3. Activate the virtual environment:
 
    ```bash
-   source venv/bin/activate
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 4. Install the required dependencies:
